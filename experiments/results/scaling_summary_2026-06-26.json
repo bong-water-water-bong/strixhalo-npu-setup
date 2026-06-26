@@ -1,0 +1,8 @@
+{"experiment":"BF16 GEMM scaling","device":"RyzenAI-npu5","toolchain":"IRON+Peano+aie_api","results":[
+{"tiles":1,"matrix":"8x8x8","us":215,"correct":true},
+{"tiles":2,"matrix":"8x8x16","us":289,"correct":true},
+{"tiles":4,"matrix":"16x8x16","us":259,"correct":true},
+{"tiles":8,"matrix":"8x8x64","us":337,"correct":true},
+{"tiles":8,"matrix":"8x16x64","us":247,"correct":true,"k_tiled":true},
+{"tiles":16,"matrix":"16x16x64","us":194,"note":"shared FIFO routing fixable"}
+],"conclusion":"Open-source BF16 GEMM on Strix Halo NPU proven through IRON+Peano+aie_api. 1-8 tiles verified correct. Gap to Chess 30.1 TFLOPS is DMA/channel management, not compiler capability."}

@@ -203,6 +203,7 @@ For open distribution, use **IRON + Peano** only — everything is Apache 2.0.
 - [FastFlowLM](https://huggingface.co/FastFlowLM) — LLM runtime for Ryzen AI NPUs
 - [Ryzen AI Docs](https://ryzenai.docs.amd.com/en/latest/) — Official AMD documentation
 
+<<<<<<< HEAD
 ## Step 10 — lemon-mlx-engine NPU Backend
 
 The [lemon-mlx-engine](https://github.com/lemonade-sdk/lemon-mlx-engine) C++ inference engine has a built-in NPU backend for ternary (1-bit) matmul acceleration.
@@ -270,3 +271,65 @@ For open distribution, use **IRON + Peano** only — everything is Apache 2.0.
 - [amd/RyzenAI-SW](https://github.com/amd/RyzenAI-SW) — AMD Ryzen AI Software
 - [FastFlowLM](https://huggingface.co/FastFlowLM) — LLM runtime for Ryzen AI NPUs
 - [Ryzen AI Docs](https://ryzenai.docs.amd.com/en/latest/) — Official AMD documentation
+=======
+---
+
+## Unified Control Plane MVP
+
+This repository includes a public clean-room `npu-ctrl` MVP for coordinating Strix Halo NPU experiments without depending on proprietary compiler internals.
+
+### Install for local development
+
+```bash
+cd ~/strixhalo-npu-setup
+python3 -m pip install -e .
+```
+
+### Use an isolated metadata store
+
+```bash
+export NPU_CTRL_STORE=/tmp/npu-control-plane-demo
+```
+
+If `NPU_CTRL_STORE` is not set, metadata is written to:
+
+```text
+~/.npu_control_plane/store
+```
+
+### Discover device and toolchain state
+
+```bash
+npu-ctrl discover
+npu-ctrl toolchain probe
+npu-ctrl status
+```
+
+Missing optional tools are reported as unavailable instead of crashing. Chess is treated as a benchmark-reference-only toolchain for public clean-room work; do not redistribute Chess artifacts or private license files.
+
+### Register a public kernel artifact
+
+```bash
+printf 'public artifact example' > /tmp/example-kernel.elf
+npu-ctrl kernels register \
+  --name vec_add \
+  --artifact /tmp/example-kernel.elf \
+  --dtype i32 \
+  --shape N=64 \
+  --toolchain peano
+npu-ctrl kernels list
+```
+
+### Record a repeatable command benchmark
+
+```bash
+npu-ctrl bench run --label python-version --warmup 0 --iters 1 -- python3 --version
+npu-ctrl bench list
+```
+
+The MVP stores JSON records for devices, toolchains, kernel artifacts, and benchmark runs. Later phases will add AIE kernel builders, profile collection, and compiler experiment integration.
+
+## Future-Frontend Bibliography
+
+> **PyTorch Export IR** — The PyTorch 2.x `torch.export` intermediate representation (IR) specification (https://docs.pytorch.org/docs/2.12/user_guide/torch_compiler/export/ir_spec.html) defines a portable graph format that may serve as a front-end for NPU control-plane kernel workflows in future phases. This source is noted here for reference only and does not expand current MVP scope.
+>>>>>>> 1e9ec3f (docs: document npu control plane mvp)
