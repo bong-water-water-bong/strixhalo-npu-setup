@@ -8,10 +8,6 @@ Usage:
     NPU_CTRL_STORE=/tmp/npu-ctrl-exp1 python3 experiments/experiment_1_passthrough.py
 """
 
-import sys
-import os
-from pathlib import Path
-
 from experiments.kernel_defs.passthrough import PassthroughKernel
 from experiments.runner import NpuRunner, ExperimentConfig
 from npu_control_plane.metadata import MetadataStore

@@ -1,7 +1,28 @@
 from dataclasses import dataclass
-from typing import Any
 from experiments_lib.datatypes import DataType, FP32
 from experiments_lib.tile_shapes import TileShape
+
+
+# stub — not compilable on its own
+PASSTHROUGH_SOURCE_LINES = [
+    "@iron.jit",
+    "def passthrough(a_in: In, c_out: Out):",
+    "    ty = np.ndarray[(N,), np.dtype[np.int32]]",
+    "    of = ObjectFifo(ty, name='fifo')",
+    "    def work(ififo, ofifo):",
+    "        ai = ififo.acquire(1)",
+    "        co = ofifo.acquire(1)",
+    "        np.copyto(co, ai)",
+    "        ofifo.release(1)",
+    "        ififo.release(1)",
+    "    w = Worker(work, [of.cons(), of.prod()], tile=Tile(0, 2))",
+    "    rt = Runtime()",
+    "    with rt.sequence(ty, ty) as (a, c):",
+    "        rt.start(w)",
+    "        rt.fill(of.prod(), a)",
+    "        rt.drain(of.cons(), c, wait=True)",
+    "    return Program(iron.get_current_device(), rt).resolve_program()",
+]
 
 
 @dataclass
@@ -15,25 +36,7 @@ class PassthroughKernel:
 
     def __post_init__(self):
         if self.source_lines is None:
-            self.source_lines = [
-                "@iron.jit",
-                "def passthrough(a_in: In, c_out: Out):",
-                "    ty = np.ndarray[(N,), np.dtype[np.int32]]",
-                "    of = ObjectFifo(ty, name='fifo')",
-                "    def work(ififo, ofifo):",
-                "        ai = ififo.acquire(1)",
-                "        co = ofifo.acquire(1)",
-                "        np.copyto(co, ai)",
-                "        ofifo.release(1)",
-                "        ififo.release(1)",
-                "    w = Worker(work, [of.cons(), of.prod()], tile=Tile(0, 2))",
-                "    rt = Runtime()",
-                "    with rt.sequence(ty, ty) as (a, c):",
-                "        rt.start(w)",
-                "        rt.fill(of.prod(), a)",
-                "        rt.drain(of.cons(), c, wait=True)",
-                "    return Program(iron.get_current_device(), rt).resolve_program()",
-            ]
+            self.source_lines = PASSTHROUGH_SOURCE_LINES
 
     def __str__(self):
         return f"PassthroughKernel(name={self.name}, dtype={self.dtype})"

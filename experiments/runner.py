@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 from npu_control_plane.metadata import MetadataStore
-from npu_control_plane.probe import which
 
 
 @dataclass
