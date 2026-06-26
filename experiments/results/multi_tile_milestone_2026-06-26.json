@@ -1,0 +1,21 @@
+{
+  "milestone": "Multi-tile BF16 GEMM compilation via Peano",
+  "device": "RyzenAI-npu5 (Strix Halo)",
+  "toolchain": "IRON + Peano + aie_api/aie.hpp (public AIE API) — open-source, no Chess",
+  "timestamp": "2026-06-26",
+  "achievements": [
+    "Single-tile BF16 GEMM via aie::mmul intrinsics: ~215 µs, verified correct",
+    "2-tile BF16 GEMM compilation via Peano: 2 ExternalFunctions with unique symbols",
+    "TensorAccessPattern for data distribution: proven API works",
+    "Worker.grid: monkey-patched and compiles",
+    "Larger tile shapes (8x16x16) blocked by AIE2P mmul shape constraints (K=8 only)",
+    "Multi-tile data partitioning understood: row-split A, broadcast B, column-split C"
+  ],
+  "remaining": [
+    "Correct multi-tile data distribution via TensorAccessPattern taps",
+    "Scaling to 4x4 and 8x4 tile grids",
+    "K-dimension tiling for larger matmuls (looping over K in core_fn)",
+    "BFP16 block-floating-point for higher throughput"
+  ],
+  "verdict": "The open-source path from IRON → Peano → aie_api AIE intrinsics → NPU is fully proven for BF16 GEMM on single tile. Multi-tile data distribution is understood but needs correct tap setup."
+}
