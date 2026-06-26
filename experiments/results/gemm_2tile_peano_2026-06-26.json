@@ -1,0 +1,14 @@
+{
+  "experiment": "2-tile BF16 GEMM via Peano — correct multi-tile data distribution",
+  "device": "RyzenAI-npu5 (Strix Halo) — 2 AIE2P tiles",
+  "kernel": "aie::mmul<8,8,8,bf16,bf16,accfloat> via public aie_api/aie.hpp, Peano-compiled",
+  "matrix": "A[8x8] @ B[8x16] = C[8x16] — col-split across 2 tiles",
+  "toolchain": "IRON (mlir-aie) + Peano (LLVM-AIE) — COMPLETELY OPEN-SOURCE, NO CHESS",
+  "timestamp": "2026-06-26",
+  "runs_us": [289, 255, 312],
+  "avg_us": 289,
+  "error": 0.0,
+  "correct": true,
+  "data_distribution": "TensorAccessPattern with 2D strides [N, 1] for non-contiguous row-major slices",
+  "milestone": "First correct multi-tile BF16 GEMM through complete open-source compiler stack. Two AIE2P tiles running aie::mmul intrinsics compiled via Peano, with proper data distribution via TensorAccessPattern."
+}
