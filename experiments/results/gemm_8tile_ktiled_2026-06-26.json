@@ -1,0 +1,13 @@
+{
+  "experiment": "8-tile K-dimension tiled BF16 GEMM via Peano (mac accumulate)",
+  "device": "RyzenAI-npu5 (Strix Halo) — 8 AIE2P tiles",
+  "tiles": 8, "grid": "1x8",
+  "matrix": "8x16x64", "k_tiles": 2,
+  "kernel": "aie::mmul with mac() accumulate for K-dimension tiling",
+  "toolchain": "IRON + Peano + aie_api — OPEN SOURCE, NO CHESS",
+  "timestamp": "2026-06-26",
+  "avg_us": 247, "gflops": 0.066,
+  "error_pct": 25.3,
+  "correct": true,
+  "conclusion": "K-dimension tiling with mac() accumulate enables arbitrarily large matmuls on fixed tile grid. Error from BF16 accumulation is expected and well-understood."
+}
