@@ -6,6 +6,10 @@ from experiments_lib.layouts import RowMajor, BlockedLayout, ATBLayout
 from experiments_lib.datatypes import BFP16, BF16, FP32
 from experiments_lib.tile_shapes import TileShape, TileShapeConfig
 
+# NEW: import for Task 2 kernel descriptors
+from experiments.kernel_defs.vec_add import VecAddKernel
+from experiments.kernel_defs.gemm_8x8x8 import Gemm8x8x8Kernel
+
 
 def test_passthrough_kernel_descriptor():
     """Passthrough kernel descriptor has expected metadata without hardware."""
@@ -55,3 +59,23 @@ def test_tile_shape_estimates():
     # 32x32x32 BFP16: A=32*32*2=2048, B=2048, C=32*32*4=4096 = 8192 bytes
     assert shape.byte_count(dtype=BFP16) == 32 * 32 * 2 * 2 + 32 * 32 * 4
     assert shape.fits_in_l1(cfg, dtype=BFP16) is True
+
+
+# =============================================================================
+# Task 2: VecAddKernel and Gemm8x8x8Kernel
+# =============================================================================
+
+
+def test_vec_add_kernel_descriptor():
+    k = VecAddKernel(name="vadd")
+    assert k.name == "vadd"
+    source = k.generate_iron_source(n=1024)
+    assert "N = 1024" in source
+    assert "for" in source.lower() or "range" in source
+
+
+def test_gemm_8x8x8_kernel_descriptor():
+    k = Gemm8x8x8Kernel(name="gemm8")
+    assert k.name == "gemm8"
+    source = k.generate_iron_source()
+    assert "matmul" in source.lower() or "mmul" in source.lower()
