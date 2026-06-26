@@ -37,21 +37,38 @@ class BenchmarkRecorder:
             if last_result.returncode != 0:
                 break
         run_id = str(uuid.uuid4())
+        timestamp = datetime.now(timezone.utc).isoformat()
+        median_ms = median(durations_ms) if durations_ms else None
+        returncode = last_result.returncode if last_result else None
+
+        # Full record stored in per-run JSON file
         record = {
             "run_id": run_id,
             "label": label,
             "command": command,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": timestamp,
             "warmup": warmup,
             "iters": iters,
             "durations_ms": durations_ms,
-            "median_ms": median(durations_ms) if durations_ms else None,
-            "returncode": last_result.returncode if last_result else None,
+            "median_ms": median_ms,
+            "returncode": returncode,
             "stdout_tail": (last_result.stdout[-4000:] if last_result else ""),
             "stderr_tail": (last_result.stderr[-4000:] if last_result else ""),
         }
         self.store.write_json("benchmarks", "runs", f"{run_id}.json", data=record)
+
+        # Lightweight summary entry for summary.json
+        summary_entry = {
+            "run_id": run_id,
+            "label": label,
+            "timestamp": timestamp,
+            "median_ms": median_ms,
+            "returncode": returncode,
+            "warmup": warmup,
+            "iters": iters,
+            "command": command,
+        }
         runs = [item for item in self.list_runs() if item.get("run_id") != run_id]
-        runs.append(record)
+        runs.append(summary_entry)
         self._write_summary(runs)
         return record
