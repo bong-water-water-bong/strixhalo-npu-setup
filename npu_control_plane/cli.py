@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Sequence
 
@@ -45,6 +46,12 @@ def _print_json(data: object) -> None:
     print(json.dumps(data, indent=2, sort_keys=True))
 
 
+def _error(message: str) -> int:
+    """Print a clean error to stderr and return exit code 2 without raising."""
+    sys.stderr.write(f"npu-ctrl: error: {message}\n")
+    return 2
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     try:
@@ -55,6 +62,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command is None:
         parser.print_help()
         return 0
+
+    # Check for missing subcommands on commands that require them
+    if args.command == "toolchain" and args.toolchain_command is None:
+        return _error("toolchain requires a subcommand (try 'probe')")
+    if args.command == "kernels" and args.kernels_command is None:
+        return _error("kernels requires a subcommand (try 'list' or 'register')")
+    if args.command == "bench" and args.bench_command is None:
+        return _error("bench requires a subcommand (try 'list' or 'run')")
+
     if args.command == "discover":
         _print_json(discover_devices(store))
         return 0
@@ -72,16 +88,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             _print_json({"kernels": registry.list()})
             return 0
         if args.kernels_command == "register":
-            _print_json(
-                registry.register(
-                    name=args.name,
-                    artifact=Path(args.artifact),
-                    dtype=args.dtype,
-                    shape=args.shape,
-                    toolchain=args.toolchain,
-                    source_hash=args.source_hash,
+            try:
+                _print_json(
+                    registry.register(
+                        name=args.name,
+                        artifact=Path(args.artifact),
+                        dtype=args.dtype,
+                        shape=args.shape,
+                        toolchain=args.toolchain,
+                        source_hash=args.source_hash,
+                    )
                 )
-            )
+            except FileNotFoundError as exc:
+                return _error(f"artifact not found: {exc}")
             return 0
     if args.command == "bench":
         recorder = BenchmarkRecorder(store)
@@ -93,7 +112,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             if command and command[0] == "--":
                 command = command[1:]
             if not command:
-                parser.error("bench run requires a command after --")
+                return _error("bench run requires a command after --")
             _print_json(recorder.record_command(args.label, command, args.warmup, args.iters))
             return 0
     parser.error(f"command not implemented yet: {args.command}")
