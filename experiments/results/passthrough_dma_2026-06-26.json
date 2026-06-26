@@ -1,0 +1,19 @@
+{
+  "experiment": "passthrough DMA baseline",
+  "kernel": "passthrough_dma",
+  "device": "RyzenAI-npu5 (Strix Halo)",
+  "tile_config": "shim → memtile → shim (forward DMA, no compute tile)",
+  "dtype": "uint8",
+  "toolchain": "IRON (mlir-aie) + Peano",
+  "timestamp": "2026-06-26",
+  "runs": [
+    {"n": 64,  "line_size": 64,  "avg_us": 138.0, "min_us": 118.8, "max_us": 163.7, "correct": true},
+    {"n": 256, "line_size": 256, "avg_us": 139.0, "min_us": 114.4, "max_us": 238.0, "correct": true},
+    {"n": 1024,"line_size": 1024,"avg_us": 217.1, "min_us": 121.6, "max_us": 353.5, "correct": true},
+    {"n": 4096,"line_size": 1024,"avg_us": 123.6, "min_us": 115.7, "max_us": 136.8, "correct": true},
+    {"n": 16384,"line_size": 1024,"avg_us": 177.4, "min_us": 139.8, "max_us": 240.9, "correct": true}
+  ],
+  "warmup": 5,
+  "iters": 20,
+  "conclusion": "DMA forward passthrough establishes ~120-220 µs baseline for data movement on one shim-memtile-shim path."
+}

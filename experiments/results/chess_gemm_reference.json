@@ -1,0 +1,14 @@
+{
+  "experiment": "Chess GEMM Reference (torch2aie config2)",
+  "device": "RyzenAI-npu5 (Strix Halo)",
+  "kernel": "ATB GEMM 192x128x96 tiles on 32 AIE2P cores",
+  "toolchain": "Chess compiler (proprietary reference)",
+  "matrix": {"M": 3072, "K": 4096, "N": 1536},
+  "timestamp": "2026-06-26",
+  "tflops": {"avg": 30.126, "min": 25.052, "max": 31.249},
+  "npu_time_us": {"avg": 1283.1, "min": 1237.0, "max": 1543.0},
+  "warmup": 20,
+  "iters": 20,
+  "license": "Xilinx.lic (free AMD EA license — not redistributable)",
+  "notes": "Clean-room benchmark reference only. Do not copy proprietary artifacts."
+}
