@@ -1,0 +1,10 @@
+{"experiment":"16-tile BF16 GEMM via NEW IRON + memtile forwarding",
+ "device":"RyzenAI-npu5 (Strix Halo)","tiles":16,"grid":"2x8",
+ "matrix":"16x8x65536","avg_us":204,"gflops":82.05,"correct":true,
+ "toolchain":"IRON (new build) + Peano + aie_api — OPEN SOURCE, NO CHESS",
+ "features":["Worker.grid native","ObjectFifo.forward() memtile",
+  "@iron.jit(aiecc_flags=['--dynamic-objFifos','--alloc-scheme=bank-aware'])",
+  "TensorAccessPattern 2D strides"],
+ "scaling_8tile_gflops":63.47,"scaling_16tile_gflops":82.05,
+ "chess_tflops":30.1,"chess_tiles":32,
+ "gap_analysis":"At 82 GFLOPS on 16 tiles (half the NPU), the open-source stack achieves 0.27% of Chess's 30.1 TFLOPS on 32 tiles. With proper K-tiling, BFP16 block-float, and 32-tile DMA management, this gap is engineering effort, not fundamental."}
