@@ -42,6 +42,31 @@ class TestKernelsRegisterMissingArtifact:
         assert "Traceback" not in captured.err
 
 
+class TestKernelsRegisterPathEscape:
+    def test_register_path_escape_returns_2_with_clean_error(self, capsys, monkeypatch, tmp_path):
+        """Path-escape values like ../../etc should return code 2 with clean error, no traceback."""
+        monkeypatch.setenv("NPU_CTRL_STORE", str(tmp_path / "store"))
+        store_path = Path(tmp_path / "store")
+        store_path.mkdir(parents=True, exist_ok=True)
+        # Create a temporary artifact file for registration
+        artifact = store_path / "test.elf"
+        artifact.write_bytes(b"\x7fELF")
+
+        code = main([
+            "kernels", "register",
+            "--name", "../../etc",
+            "--artifact", str(artifact),
+            "--dtype", "i32",
+            "--shape", "N=64",
+            "--toolchain", "peano",
+        ])
+
+        captured = capsys.readouterr()
+        assert code == 2, f"Expected exit code 2, got {code}"
+        assert "npu-ctrl: error:" in captured.err, f"Expected clean error in stderr: {captured.err}"
+        assert "Traceback" not in captured.err, f"Unexpected traceback in stderr: {captured.err}"
+
+
 class TestMissingSubcommandErrors:
     def test_toolchain_missing_subcommand_returns_2(self, capsys, monkeypatch, tmp_path):
         monkeypatch.setenv("NPU_CTRL_STORE", str(tmp_path / "store"))

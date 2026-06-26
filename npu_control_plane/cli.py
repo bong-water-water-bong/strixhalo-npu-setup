@@ -101,6 +101,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             except FileNotFoundError as exc:
                 return _error(f"artifact not found: {exc}")
+            except (ValueError, OSError) as exc:
+                return _error(str(exc))
             return 0
     if args.command == "bench":
         recorder = BenchmarkRecorder(store)

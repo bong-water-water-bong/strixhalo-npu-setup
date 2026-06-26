@@ -29,6 +29,12 @@ class KernelRegistry:
                 digest.update(chunk)
         return digest.hexdigest()
 
+    @staticmethod
+    def _validate_name(name: str) -> None:
+        """Validate kernel name to prevent path-escape attacks."""
+        if ".." in name or name.startswith("/") or name.endswith("/"):
+            raise ValueError(f"invalid kernel name (path escape detected): {name}")
+
     def register(
         self,
         name: str,
@@ -38,6 +44,7 @@ class KernelRegistry:
         toolchain: str,
         source_hash: str | None = None,
     ) -> dict[str, Any]:
+        self._validate_name(name)
         artifact = artifact.expanduser().resolve()
         if not artifact.is_file():
             raise FileNotFoundError(str(artifact))
