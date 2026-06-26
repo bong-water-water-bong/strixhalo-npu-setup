@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 from typing import Sequence
 
+from .benchmark import BenchmarkRecorder
 from .discovery import discover_devices
 from .metadata import MetadataStore
 from .registry import KernelRegistry
@@ -32,6 +33,11 @@ def build_parser() -> argparse.ArgumentParser:
     bench = sub.add_parser("bench", help="benchmark commands")
     bench_sub = bench.add_subparsers(dest="bench_command")
     bench_sub.add_parser("list", help="list benchmark runs")
+    bench_run = bench_sub.add_parser("run", help="record timings for a command")
+    bench_run.add_argument("--label", required=True)
+    bench_run.add_argument("--warmup", type=int, default=1)
+    bench_run.add_argument("--iters", type=int, default=5)
+    bench_run.add_argument("cmd", nargs=argparse.REMAINDER)
     return parser
 
 
@@ -76,6 +82,19 @@ def main(argv: Sequence[str] | None = None) -> int:
                     source_hash=args.source_hash,
                 )
             )
+            return 0
+    if args.command == "bench":
+        recorder = BenchmarkRecorder(store)
+        if args.bench_command == "list":
+            _print_json({"runs": recorder.list_runs()})
+            return 0
+        if args.bench_command == "run":
+            command = list(args.cmd)
+            if command and command[0] == "--":
+                command = command[1:]
+            if not command:
+                parser.error("bench run requires a command after --")
+            _print_json(recorder.record_command(args.label, command, args.warmup, args.iters))
             return 0
     parser.error(f"command not implemented yet: {args.command}")
     return 2
