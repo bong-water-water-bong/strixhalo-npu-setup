@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import argparse
-import sys
+import json
 from typing import Sequence
+
+from .discovery import discover_devices
+from .metadata import MetadataStore
+from .toolchains import probe_toolchains
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -22,14 +26,30 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _print_json(data: object) -> None:
+    print(json.dumps(data, indent=2, sort_keys=True))
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     try:
         args = parser.parse_args(argv)
     except SystemExit as exc:
         return exc.code if exc.code is not None else 0
+    store = MetadataStore()
     if args.command is None:
         parser.print_help()
+        return 0
+    if args.command == "discover":
+        _print_json(discover_devices(store))
+        return 0
+    if args.command == "status":
+        devices = store.read_json("devices.json", default={"devices": [], "warnings": ["run npu-ctrl discover"]})
+        toolchains = store.read_json("toolchains.json", default={"toolchains": [], "warnings": ["run npu-ctrl toolchain probe"]})
+        _print_json({"devices": devices, "toolchains": toolchains})
+        return 0
+    if args.command == "toolchain" and args.toolchain_command == "probe":
+        _print_json(probe_toolchains(store))
         return 0
     parser.error(f"command not implemented yet: {args.command}")
     return 2
