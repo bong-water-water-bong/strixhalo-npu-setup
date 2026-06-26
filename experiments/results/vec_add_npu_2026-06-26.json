@@ -1,0 +1,20 @@
+{
+  "experiment": "Vector add via IRON transform_binary",
+  "device": "RyzenAI-npu5 (Strix Halo)",
+  "kernel": "vec_add (element-wise int32 add via transform_binary)",
+  "toolchain": "IRON (mlir-aie) + Peano — open-source, no Chess",
+  "dtype": "int32",
+  "tile_size": 16,
+  "timestamp": "2026-06-26",
+  "runs": [
+    {"n": 64,   "avg_us": 161.8, "min_us": 115.7, "max_us": 518.8, "correct": true},
+    {"n": 128,  "avg_us": 176.0, "min_us": 148.0, "max_us": 343.4, "correct": true},
+    {"n": 256,  "avg_us": 133.4, "min_us": 123.8, "max_us": 149.8, "correct": true},
+    {"n": 512,  "avg_us": 167.3, "min_us": 148.4, "max_us": 288.5, "correct": true},
+    {"n": 1024, "avg_us": 135.6, "min_us": 127.6, "max_us": 146.0, "correct": true},
+    {"n": 2048, "avg_us": 135.0, "min_us": 128.9, "max_us": 145.8, "correct": true},
+    {"n": 4096, "avg_us": 155.5, "min_us": 142.8, "max_us": 178.9, "correct": true}
+  ],
+  "warmup": 5, "iters": 20,
+  "notes": "Transform_binary handles tiled ObjectFifo + Worker + Runtime setup automatically."
+}

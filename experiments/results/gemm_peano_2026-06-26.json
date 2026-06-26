@@ -1,0 +1,20 @@
+{
+  "experiment": "GEMM microkernel via Peano (no Chess)",
+  "device": "RyzenAI-npu5 (Strix Halo)",
+  "kernel": "gemm_8x8x8 (triple-nested loop int32 matmul, single AIE2P tile)",
+  "toolchain": "IRON (mlir-aie) + Peano (LLVM-AIE) — open-source, no Chess, Apache 2.0",
+  "matrix": {"M": 8, "K": 8, "N": 8},
+  "dtype": "int32",
+  "timestamp": "2026-06-26",
+  "runs": [
+    {"avg_us": 262.2, "correct": true},
+    {"avg_us": 251.5, "correct": true},
+    {"avg_us": 243.5, "correct": true},
+    {"avg_us": 250.5, "correct": true},
+    {"avg_us": 244.5, "correct": true},
+    {"avg_us": 269.1, "correct": true}
+  ],
+  "agg_avg_us": 253.6,
+  "warmup": 2, "iters": 6,
+  "conclusion": "First GEMM kernel compiled and executed through the complete open-source stack (IRON → Peano → AIE2P ELF → NPU). 8x8x8 int32 matmul on 1 AIE2P tile at ~254 µs. Chess reference: 30.1 TFLOPS on 32 tiles (3072x4096x1536). Gap is engineering effort, not magic."
+}
