@@ -12,6 +12,9 @@ license = { text = "Apache-2.0" }
 authors = [{ name = "Strix Halo NPU Contributors" }]
 dependencies = []
 
+[project.optional-dependencies]
+dev = ["pytest"]
+
 [project.scripts]
 npu-ctrl = "npu_control_plane.cli:main"
 
