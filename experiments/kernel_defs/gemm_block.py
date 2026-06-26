@@ -22,8 +22,8 @@ class GemmBlockKernel:
             object.__setattr__(self, "c_dtype", BFP16)
         self._tile = TileShape(self.block_m, self.block_k, self.block_n)
 
-    def fits_in_l1(self) -> bool:
-        return self._tile.fits_in_l1(self.a_dtype)
+    def fits_in_l1(self, dtype: DataType = None) -> bool:
+        return self._tile.fits_in_l1(dtype=dtype or self.a_dtype)
 
     def tile_count(self) -> int:
         return self.multi_tile.tile_count

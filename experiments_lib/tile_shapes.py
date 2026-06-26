@@ -18,7 +18,7 @@ class TileShape:
         c_bytes = self.m * self.n * FP32.element_size  # accumulate in FP32
         return a_bytes + b_bytes + c_bytes
 
-    def fits_in_l1(self, cfg: "TileShapeConfig" = None, dtype: DataType = BFP16) -> bool:
+    def fits_in_l1(self, cfg: "TileShapeConfig" | None = None, *, dtype: DataType = BFP16) -> bool:
         return self.byte_count(dtype) <= AIE2P_L1_BYTES
 
 
