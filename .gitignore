@@ -5,3 +5,6 @@ __pycache__/
 .pytest_cache/
 .eggs/
 .venv/
+experiments/results/
+experiments/**/*.xclbin
+experiments/**/*.elf

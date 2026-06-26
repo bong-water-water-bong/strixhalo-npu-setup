@@ -17,6 +17,7 @@ dev = ["pytest"]
 
 [project.scripts]
 npu-ctrl = "npu_control_plane.cli:main"
+exp1-passthrough = "experiments.experiment_1_passthrough:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
