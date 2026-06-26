@@ -79,3 +79,37 @@ def test_gemm_8x8x8_kernel_descriptor():
     assert k.name == "gemm8"
     source = k.generate_iron_source()
     assert "matmul" in source.lower() or "mmul" in source.lower()
+
+# =============================================================================
+# Task 4: Report generation
+# =============================================================================
+
+
+def test_generate_markdown_summary_empty(tmp_path):
+    from experiments_lib.report import generate_markdown_summary
+    from npu_control_plane.metadata import MetadataStore
+    store = MetadataStore(tmp_path / "store")
+    md = generate_markdown_summary(store)
+    assert "Benchmark Summary" in md
+    assert "No runs recorded" in md
+
+
+def test_generate_markdown_summary_with_runs(monkeypatch, tmp_path):
+    from experiments_lib.report import generate_markdown_summary
+    from npu_control_plane.metadata import MetadataStore
+    store = MetadataStore(tmp_path / "store")
+    store.write_json("benchmarks", "summary.json", data={
+        "runs": [{"label": "exp1", "median_ms": 12.3, "timestamp": "2026-01-01", "returncode": 0}]
+    })
+    md = generate_markdown_summary(store)
+    assert "exp1" in md
+    assert "12.300" in md
+
+
+def test_generate_html_summary(monkeypatch, tmp_path):
+    from experiments_lib.report import generate_html_summary
+    from npu_control_plane.metadata import MetadataStore
+    store = MetadataStore(tmp_path / "store")
+    html = generate_html_summary(store)
+    assert "<html>" in html
+    assert "No runs recorded" in html
