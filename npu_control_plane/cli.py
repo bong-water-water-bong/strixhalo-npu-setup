@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 from typing import Sequence
 
 from .discovery import discover_devices
 from .metadata import MetadataStore
+from .registry import KernelRegistry
 from .toolchains import probe_toolchains
 
 
@@ -20,6 +22,13 @@ def build_parser() -> argparse.ArgumentParser:
     kernels = sub.add_parser("kernels", help="kernel registry commands")
     kernels_sub = kernels.add_subparsers(dest="kernels_command")
     kernels_sub.add_parser("list", help="list registered kernels")
+    register = kernels_sub.add_parser("register", help="register a kernel artifact")
+    register.add_argument("--name", required=True)
+    register.add_argument("--artifact", required=True)
+    register.add_argument("--dtype", required=True)
+    register.add_argument("--shape", required=True)
+    register.add_argument("--toolchain", required=True)
+    register.add_argument("--source-hash")
     bench = sub.add_parser("bench", help="benchmark commands")
     bench_sub = bench.add_subparsers(dest="bench_command")
     bench_sub.add_parser("list", help="list benchmark runs")
@@ -51,6 +60,23 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "toolchain" and args.toolchain_command == "probe":
         _print_json(probe_toolchains(store))
         return 0
+    if args.command == "kernels":
+        registry = KernelRegistry(store)
+        if args.kernels_command == "list":
+            _print_json({"kernels": registry.list()})
+            return 0
+        if args.kernels_command == "register":
+            _print_json(
+                registry.register(
+                    name=args.name,
+                    artifact=Path(args.artifact),
+                    dtype=args.dtype,
+                    shape=args.shape,
+                    toolchain=args.toolchain,
+                    source_hash=args.source_hash,
+                )
+            )
+            return 0
     parser.error(f"command not implemented yet: {args.command}")
     return 2
 
