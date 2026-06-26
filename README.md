@@ -202,3 +202,71 @@ For open distribution, use **IRON + Peano** only — everything is Apache 2.0.
 - [amd/RyzenAI-SW](https://github.com/amd/RyzenAI-SW) — AMD Ryzen AI Software
 - [FastFlowLM](https://huggingface.co/FastFlowLM) — LLM runtime for Ryzen AI NPUs
 - [Ryzen AI Docs](https://ryzenai.docs.amd.com/en/latest/) — Official AMD documentation
+
+## Step 10 — lemon-mlx-engine NPU Backend
+
+The [lemon-mlx-engine](https://github.com/lemonade-sdk/lemon-mlx-engine) C++ inference engine has a built-in NPU backend for ternary (1-bit) matmul acceleration.
+
+### Build with NPU support
+
+```bash
+cd lemon-mlx-engine
+mkdir build && cd build
+cmake .. -DMLX_LM_BUILD_NPU=ON -DCMAKE_BUILD_TYPE=Release
+make -j
+```
+
+The build system auto-detects the LLVM-AIE clang from the MLIR-AIE venv and compiles the AIE2 kernel at build time.
+
+### Architecture
+
+```
+lemon-mlx-engine/src/npu/
+├── npu_backend.cpp          C++ XRT backend
+├── npu_backend.h            Public API
+└── kernels/
+    ├── ternary_gemv_aie.cpp  AIE2 kernel (compiled for NPU)
+    ├── gemv_aie_mmul.cpp     Vectorized GEMV variant
+    └── ternary_gemv.py       IRON JIT Python kernel
+```
+
+### MLX Integration
+
+The engine's `linear_forward()` function in `quantized_linear.h` automatically checks for NPU availability. When a 2-bit ternary weight is detected in decode mode (single token), it attempts NPU dispatch and falls back to the GPU's `quantized_matmul` kernel.
+
+Disable NPU at runtime:
+```bash
+NPU_DISABLE=1 ./chat ...
+```
+
+### Test NPU Detection
+
+```bash
+./build/test_npu
+# [NPU] RyzenAI-npu5 (31.2 TFLOPS peak)
+# ✅ NPU initialized
+```
+
+## License Notes
+
+| Component | License | Shareable? |
+|---|---|---|
+| IRON (`Xilinx/mlir-aie`) | Apache 2.0 | ✅ Yes |
+| Peano (`Xilinx/llvm-aie`) | Apache 2.0 w/ LLVM exceptions | ✅ Yes |
+| Chess compiler | Requires per-user Xilinx.lic | ⚠️ License file is personal |
+| Compiled `.xclbin` files | Derivative of Chess compiler | ⚠️ Share source, not binaries |
+| FastFlowLM | AMD proprietary EULA | ⚠️ Check EULA |
+| torch2aie toolchain | Contains Chess binaries | ⚠️ Not redistributable |
+| lemon-mlx-engine NPU backend | MIT | ✅ Yes |
+
+For open distribution, use **IRON + Peano** only — everything is Apache 2.0.
+
+## References
+
+- [lemonade-sdk/lemon-mlx-engine](https://github.com/lemonade-sdk/lemon-mlx-engine) — C++ LLM engine with NPU acceleration
+- [Xilinx/mlir-aie](https://github.com/Xilinx/mlir-aie) — IRON API + MLIR-AIE toolchain
+- [Xilinx/llvm-aie](https://github.com/Xilinx/llvm-aie) — Peano (open-source AIE2P compiler)
+- [taowen/torch2aie](https://github.com/taowen/torch2aie) — Prebuilt Chess + GEMM benchmarks
+- [amd/RyzenAI-SW](https://github.com/amd/RyzenAI-SW) — AMD Ryzen AI Software
+- [FastFlowLM](https://huggingface.co/FastFlowLM) — LLM runtime for Ryzen AI NPUs
+- [Ryzen AI Docs](https://ryzenai.docs.amd.com/en/latest/) — Official AMD documentation
