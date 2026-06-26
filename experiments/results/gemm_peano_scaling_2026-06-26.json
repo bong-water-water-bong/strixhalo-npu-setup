@@ -1,0 +1,12 @@
+{
+  "experiment": "BF16 GEMM scaling on single AIE2P tile via Peano",
+  "device": "RyzenAI-npu5 (Strix Halo)",
+  "toolchain": "IRON + Peano + aie_api/aie.hpp (public AIE API vector intrinsics) — open-source, no Chess",
+  "timestamp": "2026-06-26",
+  "runs": [
+    {"matrix": "8x8x8", "tile_equivalent": 1, "avg_us": 209, "gops": 0.005},
+    {"matrix": "8x8x16", "tile_equivalent": 2, "avg_us": 162, "gops": 0.013},
+    {"matrix": "8x8x32", "tile_equivalent": 4, "avg_us": 139, "gops": 0.029}
+  ],
+  "conclusion": "Open-source GEMM on 1 AIE2P tile using aie::mmul<8,8,8,bf16,bf16,accfloat> intrinsics compiled via Peano. Performance is DMA-bound at small sizes; larger tiles improve efficiency. True multi-tile (Worker.grid) requires a newer version of IRON (present in Xilinx/mlir-aie source but absent from the installed 1.3.2 wheel). The Chess reference (30.1 TFLOPS) uses the SAME intrinsics via Worker.grid on 32 tiles."
+}
