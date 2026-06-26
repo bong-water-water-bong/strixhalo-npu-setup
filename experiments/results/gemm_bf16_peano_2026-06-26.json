@@ -1,0 +1,15 @@
+{
+  "experiment": "BF16 GEMM via Peano (public AIE API vector intrinsics)",
+  "device": "RyzenAI-npu5 (Strix Halo) — single AIE2P tile",
+  "kernel": "aie::mmul<8,8,8,bfloat16,bfloat16,accfloat> via public aie_api/aie.hpp",
+  "toolchain": "IRON (mlir-aie) + Peano (LLVM-AIE) — COMPLETELY OPEN SOURCE, NO CHESS",
+  "matrix": {"M": 8, "K": 8, "N": 8},
+  "timestamp": "2026-06-26",
+  "runs_us": [230.8, 222.2, 205.8, 228.0, 199.3, 204.6],
+  "avg_us": 215.1,
+  "warmup": 2, "iters": 6,
+  "error": "zero (values exactly representable in BF16)",
+  "correct": true,
+  "milestone": "First BF16 GEMM using vector intrinsics through the complete open-source stack. The public AIE API (aie::mmul, aie::load_v, aie::store_v) compiles and runs correctly via Peano. No Chess involvement.",
+  "conclusion": "The open-source compiler path (IRON -> Peano -> AIE2P ELF -> NPU) can now use the same AIE API vector intrinsics as the Chess-compiled path. Scaling to multi-tile and larger matrices is the remaining engineering work."
+}
