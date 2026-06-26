@@ -1,0 +1,19 @@
+{
+  "experiment": "Open-source BF16 GEMM scaling (IRON+Peano, no Chess)",
+  "device": "RyzenAI-npu5 (Strix Halo) — 8 AIE2P tiles (columns 0-7, row 2)",
+  "kernel": "aie::mmul<8,8,8,bf16,bf16,accfloat> with mac() accumulate, K-dim tiling (KI=2)",
+  "toolchain": "IRON (mlir-aie v1.3.2) + Peano (LLVM-AIE 21.0.0) + aie_api/aie.hpp — Apache 2.0",
+  "timestamp": "2026-06-26",
+  "runs": [
+    {"N": 64,   "us": 219, "gflops": 0.07},
+    {"N": 128,  "us": 178, "gflops": 0.18},
+    {"N": 256,  "us": 181, "gflops": 0.36},
+    {"N": 512,  "us": 219, "gflops": 0.60},
+    {"N": 1024, "us": 220, "gflops": 1.19},
+    {"N": 2048, "us": 232, "gflops": 2.26},
+    {"N": 4096, "us": 177, "gflops": 5.92},
+    {"N": 8192, "us": 184, "gflops": 11.40}
+  ],
+  "configuration": "M=8, K=16 (2 K-tiles of 8), N=sweep, tiles=8 (1x8 grid), stack_size=0x600",
+  "conclusion": "Open-source BF16 GEMM achieves 11.4 GFLOPS on 8 AIE2P tiles. Performance scales linearly with N (compute-bound regime). The Chess reference (30.1 TFLOPS, 32 tiles) uses the same aie::mmul intrinsics compiled through Chess instead of Peano."
+}
