@@ -1,0 +1,4 @@
+{"experiment":"8-tile BF16 GEMM via Peano (1x8 grid)",
+ "device":"RyzenAI-npu5","tiles":8,"grid":"1x8",
+ "matrix":"8x8x64","avg_us":337,"error":0.002,"correct":true,
+ "toolchain":"IRON + Peano + aie_api — open-source, no Chess"}
