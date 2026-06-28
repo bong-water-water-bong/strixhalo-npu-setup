@@ -68,6 +68,10 @@ _KERNEL_8ACC = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     "kernel_gemm_bfp16_8acc.cc",
 )
+_KERNEL_VLIW = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "kernel_gemm_vliw.cc",
+)
 
 
 def _device_for(dev_str, n_aie_cols):
@@ -111,6 +115,7 @@ def _build_phase5_design(
     unroll_2x, # 2× unrolled inner K-loop for better VLIW scheduling
     swp,       # Phase 6: manual software pipelining
     acc8,      # Phase 6: 8-accumulator 2×4 mmul expansion
+    vliw,      # Explicit VLIW-scheduled kernel (Chess+Peano compatible)
 ):
     """Build the packed GEMM IRON design and resolve to MLIR."""
     dev_str = "npu2" if isinstance(dev, NPU2) else "npu"
@@ -149,7 +154,11 @@ def _build_phase5_design(
 
     if no_ii1:
         compile_flags_base.append("-DNO_II1")
-    if acc8:
+    if vliw:
+        kernel_file = _KERNEL_VLIW
+        matmul_name = "gemm_bf16_f32_vliw" if is_bf16 else "gemm_i8_i32_vliw"
+        zero_name = "zero_f32_vliw" if is_bf16 else "zero_i32_vliw"
+    elif acc8:
         kernel_file = _KERNEL_8ACC
         matmul_name = "gemm_bf16_f32_bfp16_8acc" if is_bf16 else "gemm_i8_i32_8acc"
         zero_name = "zero_f32_8acc" if is_bf16 else "zero_i32_8acc"
@@ -399,11 +408,12 @@ def phase5_packed(
     unroll_2x: CompileTime[bool] = False,
     swp: CompileTime[bool] = False,
     acc8: CompileTime[bool] = False,
+    vliw: CompileTime[bool] = False,
 ):
     return _build_phase5_design(
         iron.get_current_device(), M, K, N, m, k, n, n_aie_cols,
         dtype_in_str, dtype_out_str, b_col_maj, c_col_maj,
-        emulate_bf16_mmul_with_bfp16, use_chess, scalar, pre_pack, no_ii1, unroll_2x, swp, acc8,
+        emulate_bf16_mmul_with_bfp16, use_chess, scalar, pre_pack, no_ii1, unroll_2x, swp, acc8, vliw,
     )
 
 
@@ -443,6 +453,8 @@ def _make_argparser():
                    help="Phase 6: manual prologue/kernel/epilogue software pipelining")
     p.add_argument("--8acc", action="store_true", dest="acc8",
                    help="Phase 6: 8-accumulator 2x4 mmul expansion (II=1 capable)")
+    p.add_argument("--vliw", action="store_true",
+                   help="Explicit VLIW-scheduled kernel (Chess+Peano compatible)")
     p.add_argument("--save-xclbin", action="store_true",
                    help="Save xclbin from JIT cache to saved_xclbins/")
     return p
@@ -462,6 +474,7 @@ def _compile_kwargs(opts):
         unroll_2x=opts.unroll_2x,
         swp=opts.swp,
         acc8=opts.acc8,
+        vliw=opts.vliw,
     )
 
 
@@ -535,6 +548,7 @@ def _run_and_verify(opts):
         unroll_2x=opts.unroll_2x,
         swp=opts.swp,
         acc8=opts.acc8,
+        vliw=opts.vliw,
         warmup=opts.warmup, iters=opts.iters,
     )
 
